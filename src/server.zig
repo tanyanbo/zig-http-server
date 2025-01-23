@@ -1,4 +1,5 @@
 const std = @import("std");
+const httpParser = @import("httpParser.zig");
 const net = std.net;
 
 pub fn listen() !void {
@@ -13,6 +14,19 @@ pub fn listen() !void {
     while (true) {
         const connection = try listener.accept();
         try stdout.print("client connected!\n", .{});
-        try connection.stream.writeAll("HTTP/1.1 200 OK\r\n\r\n");
+
+        var gpa = std.heap.GeneralPurposeAllocator(.{}){};
+        const allocator = gpa.allocator();
+        const input = try allocator.alloc(u8, 1024);
+        defer allocator.free(input);
+
+        _ = try connection.stream.read(input);
+
+        const request = httpParser.parse(input);
+
+        try stdout.print("method: {any}, target: {s}", .{ request.method, request.target });
+
+        try connection.stream.writeAll("HTTP/1.1 200 OK\r\n\r\nhello world");
+        connection.stream.close();
     }
 }

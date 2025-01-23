@@ -7,5 +7,7 @@ pub fn main() !void {
 
     try stdout.print("Logs from your program will appear here!\n", .{});
 
-    try server.listen();
+    server.listen() catch {
+        std.debug.print("error\n", .{});
+    };
 }
