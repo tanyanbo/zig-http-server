@@ -22,11 +22,14 @@ pub fn listen() !void {
 
         _ = try connection.stream.read(input);
 
-        const request = httpParser.parse(input);
+        const request = try httpParser.parse(input);
 
-        try stdout.print("method: {any}, target: {s}", .{ request.method, request.target });
+        if (std.mem.eql(u8, request.target, "/")) {
+            try connection.stream.writeAll("HTTP/1.1 200 OK\r\n\r\n");
+        } else {
+            try connection.stream.writeAll("HTTP/1.1 404 Not Found\r\n\r\n");
+        }
 
-        try connection.stream.writeAll("HTTP/1.1 200 OK\r\n\r\nhello world");
         connection.stream.close();
     }
 }
