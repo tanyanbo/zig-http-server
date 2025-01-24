@@ -4,8 +4,9 @@ const response = @import("response.zig");
 const HttpResponseCode = @import("statusCodes.zig").HttpResponseCode;
 const net = std.net;
 
-pub fn listen(address: net.Address) !void {
+pub fn listen(ip: []const u8, port: u16) !void {
     const stdout = std.io.getStdOut().writer();
+    const address = try net.Address.resolveIp(ip, port);
 
     var listener = try address.listen(.{
         .reuse_address = true,
