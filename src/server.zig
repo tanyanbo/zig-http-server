@@ -1,5 +1,7 @@
 const std = @import("std");
 const request = @import("request.zig");
+const response = @import("response.zig");
+const HttpResponseCode = @import("statusCodes.zig").HttpResponseCode;
 const net = std.net;
 
 pub fn listen() !void {
@@ -25,7 +27,13 @@ pub fn listen() !void {
         const req = try request.parseRequest(input);
 
         if (std.mem.eql(u8, req.target, "/")) {
-            try connection.stream.writeAll("HTTP/1.1 200 OK\r\n\r\n");
+            const httpResponse = response.HttpResponse{
+                .status = HttpResponseCode.Ok,
+                .body = "Hello World!",
+            };
+            const resp = try response.getResponse(allocator, httpResponse);
+            defer allocator.free(resp);
+            try connection.stream.writeAll(resp);
         } else {
             try connection.stream.writeAll("HTTP/1.1 404 Not Found\r\n\r\n");
         }

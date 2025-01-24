@@ -8,9 +8,15 @@ pub const HttpResponse = struct {
 };
 
 pub fn getResponse(allocator: std.mem.Allocator, httpResponse: HttpResponse) ![]const u8 {
-    const response = try std.fmt.allocPrint(allocator, "HTTP/1.1 {d} {s}", .{
+    const response = try std.fmt.allocPrint(allocator,
+        \\HTTP/1.1 {d} {s}
+        \\Content-Type: text/html
+        \\
+        \\{s}
+    , .{
         @intFromEnum(httpResponse.status),
         std.enums.tagName(HttpResponseCode, httpResponse.status).?,
+        httpResponse.body.?,
     });
     return response;
 }
@@ -22,7 +28,7 @@ test "resp" {
 
     const httpResponse = HttpResponse{
         .status = HttpResponseCode.Ok,
-        .body = null,
+        .body = "Hello World!",
     };
     const r = try getResponse(allocator, httpResponse);
     defer allocator.free(r);
