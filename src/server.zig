@@ -1,5 +1,5 @@
 const std = @import("std");
-const httpParser = @import("httpParser.zig");
+const request = @import("request.zig");
 const net = std.net;
 
 pub fn listen() !void {
@@ -22,9 +22,9 @@ pub fn listen() !void {
 
         _ = try connection.stream.read(input);
 
-        const request = try httpParser.parse(input);
+        const req = try request.parseRequest(input);
 
-        if (std.mem.eql(u8, request.target, "/")) {
+        if (std.mem.eql(u8, req.target, "/")) {
             try connection.stream.writeAll("HTTP/1.1 200 OK\r\n\r\n");
         } else {
             try connection.stream.writeAll("HTTP/1.1 404 Not Found\r\n\r\n");
