@@ -4,10 +4,9 @@ const response = @import("response.zig");
 const HttpResponseCode = @import("statusCodes.zig").HttpResponseCode;
 const net = std.net;
 
-pub fn listen() !void {
+pub fn listen(address: net.Address) !void {
     const stdout = std.io.getStdOut().writer();
 
-    const address = try net.Address.resolveIp("127.0.0.1", 4221);
     var listener = try address.listen(.{
         .reuse_address = true,
     });
@@ -29,7 +28,7 @@ pub fn listen() !void {
         if (std.mem.eql(u8, req.target, "/")) {
             const httpResponse = response.HttpResponse{
                 .status = HttpResponseCode.Ok,
-                .body = "Hello World!",
+                .body = "Hello World",
             };
             const resp = try response.getResponse(allocator, httpResponse);
             defer allocator.free(resp);
